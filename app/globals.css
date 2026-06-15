@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  --color-goguma: #FF6B35;
+  --color-goguma-dark: #E55A2B;
+  --color-goguma-light: #FFE4D6;
+  --color-goguma-bg: #FFF8F0;
+}
+
+:root {
+  --background: #FFF5F0;
+  --foreground: #1A1A1A;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), -apple-system, system-ui, sans-serif;
+}
+
+@keyframes float1 {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-14px) rotate(12deg); }
+}
+@keyframes float2 {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(-10deg); }
+}
+@keyframes float3 {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.15); }
+}
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+@keyframes pop-in {
+  0% { transform: scale(0.85); opacity: 0; }
+  70% { transform: scale(1.04); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.float-1 { animation: float1 4s ease-in-out infinite; }
+.float-2 { animation: float2 5.5s ease-in-out infinite; }
+.float-3 { animation: float3 3.5s ease-in-out infinite; }
+.wiggle  { animation: wiggle 2s ease-in-out infinite; }
+.pop-in  { animation: pop-in 0.45s ease-out both; }
