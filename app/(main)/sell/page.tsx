@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { createListing } from '@/app/actions/listings'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -42,12 +42,31 @@ const focusOff = (e: React.FocusEvent<HTMLElement>) => {
 export default function SellPage() {
   const [state, action, isPending] = useActionState(createListing, { error: null })
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
 
-  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []).slice(0, MAX_IMAGES)
+  // files가 바뀔 때마다 실제 <input>의 선택 목록도 맞춰준다 (제출 시 이걸 읽기 때문)
+  useEffect(() => {
+    if (!fileInputRef.current) return
+    const dt = new DataTransfer()
+    files.forEach((file) => dt.items.add(file))
+    fileInputRef.current.files = dt.files
+  }, [files])
+
+  function syncFiles(next: File[]) {
+    setFiles(next)
     previews.forEach((url) => URL.revokeObjectURL(url))
-    setPreviews(files.map((file) => URL.createObjectURL(file)))
+    setPreviews(next.map((file) => URL.createObjectURL(file)))
+  }
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = Array.from(e.target.files ?? [])
+    syncFiles([...files, ...picked].slice(0, MAX_IMAGES))
+  }
+
+  function removeImage(index: number) {
+    syncFiles(files.filter((_, i) => i !== index))
   }
 
   return (
@@ -73,11 +92,17 @@ export default function SellPage() {
           <div className="flex flex-wrap gap-2">
             <label
               className="flex-shrink-0 w-20 h-20 rounded-2xl flex flex-col items-center justify-center cursor-pointer"
-              style={{ border: '1.5px dashed #FFD0B5', background: '#FFFAF7', color: '#A0622E' }}
+              style={{
+                border: '1.5px dashed #FFD0B5',
+                background: '#FFFAF7',
+                color: '#A0622E',
+                display: previews.length < MAX_IMAGES ? 'flex' : 'none',
+              }}
             >
               <span className="text-xl">📷</span>
               <span className="text-xs mt-0.5">{previews.length}/{MAX_IMAGES}</span>
               <input
+                ref={fileInputRef}
                 name="images"
                 type="file"
                 accept="image/*"
@@ -89,6 +114,14 @@ export default function SellPage() {
             {previews.map((url, i) => (
               <div key={url} className="relative w-20 h-20 rounded-2xl overflow-hidden" style={{ border: '1.5px solid #FFD0B5' }}>
                 <Image src={url} alt={`미리보기 ${i + 1}`} fill className="object-cover" unoptimized />
+                <button
+                  type="button"
+                  onClick={() => removeImage(i)}
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs"
+                  style={{ background: 'rgba(0,0,0,0.55)', color: 'white' }}
+                >
+                  ×
+                </button>
               </div>
             ))}
           </div>
