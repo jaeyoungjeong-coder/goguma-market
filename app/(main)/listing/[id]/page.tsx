@@ -4,6 +4,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { OwnerActionBar, BuyerActionBar } from './ActionBar'
 import ImageGallery from './ImageGallery'
+import LikeButton from './LikeButton'
+import CommentsSection from './CommentsSection'
 
 function timeAgo(dateStr: string) {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -53,6 +55,26 @@ export default async function ListingDetailPage({
   const isOwner  = user.id === listing.user_id
   const nickname = profile?.nickname ?? '고구마 유저'
   const catEmoji = CATEGORY_EMOJI[listing.category] ?? '📦'
+
+  // 좋아요 수 + 내가 눌렀는지 여부
+  const { count: likeCount } = await supabase
+    .from('likes')
+    .select('*', { count: 'exact', head: true })
+    .eq('listing_id', listing.id)
+
+  const { data: myLike } = await supabase
+    .from('likes')
+    .select('id')
+    .eq('listing_id', listing.id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  // 댓글 목록
+  const { data: comments } = await supabase
+    .from('comments')
+    .select('id, content, created_at, user_id, profiles(nickname)')
+    .eq('listing_id', listing.id)
+    .order('created_at', { ascending: true })
 
   return (
     <div className="flex flex-col gap-0 pb-28">
@@ -109,10 +131,13 @@ export default async function ListingDetailPage({
         {listing.title}
       </h1>
 
-      {/* 가격 */}
-      <p className="text-2xl font-extrabold mb-4" style={{ color: '#FF6B35' }}>
-        {formatPrice(listing.price)}
-      </p>
+      {/* 가격 + 좋아요 */}
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-2xl font-extrabold" style={{ color: '#FF6B35' }}>
+          {formatPrice(listing.price)}
+        </p>
+        <LikeButton listingId={listing.id} initialLiked={!!myLike} initialCount={likeCount ?? 0} />
+      </div>
 
       {/* 판매자 정보 */}
       <div
@@ -153,6 +178,16 @@ export default async function ListingDetailPage({
       ) : (
         <p className="text-sm" style={{ color: '#CCC' }}>등록된 설명이 없어요.</p>
       )}
+
+      {/* 구분선 */}
+      <div style={{ height: '1px', background: '#FFE4D6', margin: '1.25rem 0' }} />
+
+      {/* 댓글 */}
+      <CommentsSection
+        listingId={listing.id}
+        currentUserId={user.id}
+        comments={comments ?? []}
+      />
 
       {/* 하단 액션 바 */}
       {isOwner ? <OwnerActionBar id={listing.id} /> : <BuyerActionBar />}
