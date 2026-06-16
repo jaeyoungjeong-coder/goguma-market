@@ -31,7 +31,7 @@ export default async function HomePage() {
 
   const { data: listings } = await supabase
     .from('listings')
-    .select('id, title, price, category, status, created_at, images')
+    .select('id, title, price, category, status, created_at, images, likes(count)')
     .order('created_at', { ascending: false })
     .limit(50)
 
@@ -152,9 +152,14 @@ export default async function HomePage() {
                 <p className="text-xs mt-0.5" style={{ color: '#C0A080' }}>
                   {item.category} · {timeAgo(item.created_at)}
                 </p>
-                <p className="font-bold text-sm mt-1.5" style={{ color: '#FF6B35' }}>
-                  {formatPrice(item.price)}
-                </p>
+                <div className="flex items-center justify-between mt-1.5">
+                  <p className="font-bold text-sm" style={{ color: '#FF6B35' }}>
+                    {formatPrice(item.price)}
+                  </p>
+                  <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: '#D4789A' }}>
+                    ❤️ {item.likes?.[0]?.count ?? 0}
+                  </span>
+                </div>
               </div>
 
               {/* 화살표 */}

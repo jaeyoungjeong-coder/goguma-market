@@ -1,9 +1,6 @@
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #FFF0F5 0%, #FFE8D6 45%, #FFD6F0 100%)' }}
-    >
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden">
       {/* 플로팅 데코레이션 */}
       <span className="float-1 select-none" style={{ position: 'absolute', top: '7%',  left: '8%',  fontSize: '2.2rem', opacity: 0.55 }}>🍠</span>
       <span className="float-2 select-none" style={{ position: 'absolute', top: '13%', right: '9%',  fontSize: '1.6rem', opacity: 0.5  }}>✨</span>

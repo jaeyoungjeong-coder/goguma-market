@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FFF5F0 0%, #FFF9F5 100%)' }}>
+    <div className="min-h-screen">
       {/* 헤더 */}
       <header
         className="sticky top-0 z-10"
