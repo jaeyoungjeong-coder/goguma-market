@@ -22,6 +22,12 @@ const STATUS_LABEL: Record<string, string> = {
   sold:     '판매완료',
 }
 
+const CARD_STYLE: Record<string, { bg: string; border: string; title: string; sub: string; price: string }> = {
+  selling:  { bg: '#FFFFFF', border: 'rgba(255,210,190,0.4)', title: '#1A1A1A', sub: '#C0A080', price: '#FF6B35' },
+  reserved: { bg: '#FFFBEA', border: 'rgba(255,224,130,0.6)', title: '#7A5B00', sub: '#BFA34D', price: '#A87B00' },
+  sold:     { bg: '#F2F2F2', border: 'rgba(200,200,200,0.5)', title: '#999999', sub: '#AAAAAA', price: '#999999' },
+}
+
 export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -92,12 +98,14 @@ export default async function HomePage() {
       {/* 판매글 목록 */}
       {listings && listings.length > 0 && (
         <div className="flex flex-col gap-2">
-          {listings.map((item) => (
+          {listings.map((item) => {
+            const cardStyle = CARD_STYLE[item.status] ?? CARD_STYLE.selling
+            return (
             <Link
               key={item.id}
               href={`/listing/${item.id}`}
-              className="bg-white rounded-2xl p-4 flex items-center gap-4 transition-transform active:scale-[0.98]"
-              style={{ border: '1px solid rgba(255,210,190,0.4)', boxShadow: '0 2px 12px rgba(255,107,53,0.06)' }}
+              className="rounded-2xl p-4 flex items-center gap-4 transition-transform active:scale-[0.98]"
+              style={{ background: cardStyle.bg, border: `1px solid ${cardStyle.border}`, boxShadow: '0 2px 12px rgba(255,107,53,0.06)' }}
             >
               {/* 이미지 */}
               {item.images && item.images.length > 0 ? (
@@ -132,7 +140,7 @@ export default async function HomePage() {
               {/* 내용 */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="font-semibold text-sm truncate" style={{ color: '#1A1A1A' }}>
+                  <p className="font-semibold text-sm truncate" style={{ color: cardStyle.title }}>
                     {item.title}
                   </p>
                   <span
@@ -149,23 +157,24 @@ export default async function HomePage() {
                     {STATUS_LABEL[item.status]}
                   </span>
                 </div>
-                <p className="text-xs mt-0.5" style={{ color: '#C0A080' }}>
+                <p className="text-xs mt-0.5" style={{ color: cardStyle.sub }}>
                   {item.category} · {timeAgo(item.created_at)}
                 </p>
                 <div className="flex items-center justify-between mt-1.5">
-                  <p className="font-bold text-sm" style={{ color: '#FF6B35' }}>
+                  <p className="font-bold text-sm" style={{ color: cardStyle.price }}>
                     {formatPrice(item.price)}
                   </p>
-                  <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: '#D4789A' }}>
+                  <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: cardStyle.sub }}>
                     ❤️ {item.likes?.[0]?.count ?? 0}
                   </span>
                 </div>
               </div>
 
               {/* 화살표 */}
-              <span className="text-sm" style={{ color: '#FFD0B5' }}>›</span>
+              <span className="text-sm" style={{ color: cardStyle.border }}>›</span>
             </Link>
-          ))}
+            )
+          })}
         </div>
       )}
 
