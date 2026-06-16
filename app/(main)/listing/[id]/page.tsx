@@ -46,10 +46,10 @@ export default async function ListingDetailPage({
 
   if (!listing) notFound()
 
-  // 판매자 닉네임 조회
+  // 판매자 프로필 조회
   const { data: profile } = await supabase
     .from('profiles')
-    .select('nickname')
+    .select('nickname, avatar_url, bio')
     .eq('id', listing.user_id)
     .single()
 
@@ -151,13 +151,20 @@ export default async function ListingDetailPage({
         style={{ background: '#FFFAF7', border: '1px solid #FFE4D6' }}
       >
         <div
-          className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
+          className="relative w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-lg overflow-hidden"
           style={{ background: 'linear-gradient(135deg, #FF6B35, #FF3D9A)' }}
         >
-          🍠
+          {profile?.avatar_url ? (
+            <Image src={profile.avatar_url} alt={nickname} fill className="object-cover" />
+          ) : (
+            '🍠'
+          )}
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="font-bold text-sm" style={{ color: '#1A1A1A' }}>{nickname}</p>
+          {profile?.bio && (
+            <p className="text-xs mt-0.5 truncate" style={{ color: '#A0622E' }}>{profile.bio}</p>
+          )}
           <p className="text-xs" style={{ color: '#C0A080' }}>
             {timeAgo(listing.created_at)} 등록
           </p>

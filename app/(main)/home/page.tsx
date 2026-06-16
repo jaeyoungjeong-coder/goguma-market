@@ -35,6 +35,12 @@ export default async function HomePage() {
 
   const nickname = user.user_metadata?.nickname || user.email?.split('@')[0]
 
+  const { data: myProfile } = await supabase
+    .from('profiles')
+    .select('avatar_url')
+    .eq('id', user.id)
+    .single()
+
   const { data: listings } = await supabase
     .from('listings')
     .select('id, title, price, category, status, created_at, images, likes(count)')
@@ -52,13 +58,36 @@ export default async function HomePage() {
         }}
       >
         <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '6rem', opacity: 0.15 }}>🍠</div>
-        <p className="text-sm opacity-80 mb-1">안녕하세요! 👋</p>
-        <p className="text-xl font-extrabold">{nickname} 님</p>
-        <div
-          className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-xs font-semibold"
-          style={{ background: 'rgba(255,255,255,0.25)' }}
-        >
-          <span>🌟</span> 고구마마켓 회원
+        <div className="flex items-center gap-3">
+          <div
+            className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-xl"
+            style={{ background: 'rgba(255,255,255,0.25)' }}
+          >
+            {myProfile?.avatar_url ? (
+              <Image src={myProfile.avatar_url} alt={nickname} fill className="object-cover" />
+            ) : (
+              '🍠'
+            )}
+          </div>
+          <div>
+            <p className="text-sm opacity-80 mb-1">안녕하세요! 👋</p>
+            <p className="text-xl font-extrabold">{nickname} 님</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 mt-3">
+          <div
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+            style={{ background: 'rgba(255,255,255,0.25)' }}
+          >
+            <span>🌟</span> 고구마마켓 회원
+          </div>
+          <Link
+            href="/profile/edit"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
+            style={{ background: 'rgba(255,255,255,0.25)' }}
+          >
+            ✏️ 프로필 수정
+          </Link>
         </div>
       </div>
 
