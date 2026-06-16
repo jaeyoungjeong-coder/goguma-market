@@ -6,6 +6,7 @@ import { OwnerActionBar, BuyerActionBar } from './ActionBar'
 import ImageGallery from './ImageGallery'
 import LikeButton from './LikeButton'
 import CommentsSection from './CommentsSection'
+import StatusSelector from './StatusSelector'
 
 function timeAgo(dateStr: string) {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -103,21 +104,26 @@ export default async function ListingDetailPage({
         </div>
       )}
 
+      {/* 상태 변경 (글쓴이만) */}
+      {isOwner && <StatusSelector id={listing.id} initialStatus={listing.status} />}
+
       {/* 상태 + 카테고리 */}
       <div className="flex items-center gap-2 mb-3">
-        <span
-          className="text-xs px-3 py-1 rounded-full font-semibold"
-          style={{
-            background: listing.status === 'selling'  ? '#FFF0E8'
-                      : listing.status === 'reserved' ? '#FFF3CD'
-                      : '#F0F0F0',
-            color:      listing.status === 'selling'  ? '#FF6B35'
-                      : listing.status === 'reserved' ? '#856404'
-                      : '#888',
-          }}
-        >
-          {listing.status === 'selling' ? '판매중 🟠' : listing.status === 'reserved' ? '예약중 🟡' : '판매완료 ⚫'}
-        </span>
+        {!isOwner && (
+          <span
+            className="text-xs px-3 py-1 rounded-full font-semibold"
+            style={{
+              background: listing.status === 'selling'  ? '#FFF0E8'
+                        : listing.status === 'reserved' ? '#FFF3CD'
+                        : '#F0F0F0',
+              color:      listing.status === 'selling'  ? '#FF6B35'
+                        : listing.status === 'reserved' ? '#856404'
+                        : '#888',
+            }}
+          >
+            {listing.status === 'selling' ? '판매중 🟠' : listing.status === 'reserved' ? '거래중 🟡' : '판매완료 ⚫'}
+          </span>
+        )}
         <span
           className="text-xs px-3 py-1 rounded-full font-medium"
           style={{ background: '#F5F5F5', color: '#888' }}

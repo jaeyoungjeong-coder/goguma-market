@@ -17,7 +17,8 @@ function formatPrice(price: number) {
 }
 
 const STATUS_LABEL: Record<string, string> = {
-  reserved: '예약중',
+  selling:  '판매중',
+  reserved: '거래중',
   sold:     '판매완료',
 }
 
@@ -134,17 +135,19 @@ export default async function HomePage() {
                   <p className="font-semibold text-sm truncate" style={{ color: '#1A1A1A' }}>
                     {item.title}
                   </p>
-                  {item.status !== 'selling' && (
-                    <span
-                      className="flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-medium"
-                      style={{
-                        background: item.status === 'reserved' ? '#FFF3CD' : '#F0F0F0',
-                        color:      item.status === 'reserved' ? '#856404' : '#888',
-                      }}
-                    >
-                      {STATUS_LABEL[item.status]}
-                    </span>
-                  )}
+                  <span
+                    className="flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-medium"
+                    style={{
+                      background: item.status === 'selling'  ? '#FFF0E8'
+                                : item.status === 'reserved' ? '#FFF3CD'
+                                : '#F0F0F0',
+                      color:      item.status === 'selling'  ? '#FF6B35'
+                                : item.status === 'reserved' ? '#856404'
+                                : '#888',
+                    }}
+                  >
+                    {STATUS_LABEL[item.status]}
+                  </span>
                 </div>
                 <p className="text-xs mt-0.5" style={{ color: '#C0A080' }}>
                   {item.category} · {timeAgo(item.created_at)}

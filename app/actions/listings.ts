@@ -2,7 +2,10 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import type { SupabaseClient } from '@supabase/supabase-js'
+
+export type ListingStatus = 'selling' | 'reserved' | 'sold'
 
 export type ListingState = {
   error: string | null
@@ -172,4 +175,21 @@ export async function deleteListing(id: number) {
   if (listing!.images?.length) await deleteImagesFromStorage(supabase, listing!.images as string[])
 
   redirect('/home')
+}
+
+export async function updateListingStatus(id: number, status: ListingStatus) {
+  const { error: ownerError } = await verifyOwner(id)
+  if (ownerError) return
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  await supabase
+    .from('listings')
+    .update({ status })
+    .eq('id', id)
+    .eq('user_id', user!.id)
+
+  revalidatePath(`/listing/${id}`)
+  revalidatePath('/home')
 }
