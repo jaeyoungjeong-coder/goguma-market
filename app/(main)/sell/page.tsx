@@ -1,8 +1,11 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { createListing } from '@/app/actions/listings'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+
+const MAX_IMAGES = 5
 
 const CATEGORIES = [
   '디지털/가전',
@@ -39,6 +42,13 @@ const focusOff = (e: React.FocusEvent<HTMLElement>) => {
 export default function SellPage() {
   const [state, action, isPending] = useActionState(createListing, { error: null })
   const router = useRouter()
+  const [previews, setPreviews] = useState<string[]>([])
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []).slice(0, MAX_IMAGES)
+    previews.forEach((url) => URL.revokeObjectURL(url))
+    setPreviews(files.map((file) => URL.createObjectURL(file)))
+  }
 
   return (
     <div>
@@ -55,6 +65,35 @@ export default function SellPage() {
       </div>
 
       <form action={action} className="flex flex-col gap-5">
+        {/* 사진 */}
+        <div>
+          <label className="block text-sm font-semibold mb-2" style={{ color: '#A0622E' }}>
+            사진 <span className="font-normal text-xs" style={{ color: '#CCC' }}>(최대 {MAX_IMAGES}장)</span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            <label
+              className="flex-shrink-0 w-20 h-20 rounded-2xl flex flex-col items-center justify-center cursor-pointer"
+              style={{ border: '1.5px dashed #FFD0B5', background: '#FFFAF7', color: '#A0622E' }}
+            >
+              <span className="text-xl">📷</span>
+              <span className="text-xs mt-0.5">{previews.length}/{MAX_IMAGES}</span>
+              <input
+                name="images"
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleImageChange}
+              />
+            </label>
+            {previews.map((url, i) => (
+              <div key={url} className="relative w-20 h-20 rounded-2xl overflow-hidden" style={{ border: '1.5px solid #FFD0B5' }}>
+                <Image src={url} alt={`미리보기 ${i + 1}`} fill className="object-cover" unoptimized />
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* 제목 */}
         <div>
           <label className="block text-sm font-semibold mb-2" style={{ color: '#A0622E' }}>

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { signOut } from '@/app/actions/auth'
 import Link from 'next/link'
+import Image from 'next/image'
 
 function timeAgo(dateStr: string) {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -29,7 +30,7 @@ export default async function HomePage() {
 
   const { data: listings } = await supabase
     .from('listings')
-    .select('id, title, price, category, status, created_at')
+    .select('id, title, price, category, status, created_at, images')
     .order('created_at', { ascending: false })
     .limit(50)
 
@@ -97,13 +98,35 @@ export default async function HomePage() {
               className="bg-white rounded-2xl p-4 flex items-center gap-4 transition-transform active:scale-[0.98]"
               style={{ border: '1px solid rgba(255,210,190,0.4)', boxShadow: '0 2px 12px rgba(255,107,53,0.06)' }}
             >
-              {/* 이미지 자리 */}
-              <div
-                className="flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center text-2xl"
-                style={{ background: '#FFF0E8' }}
-              >
-                🍠
-              </div>
+              {/* 이미지 */}
+              {item.images && item.images.length > 0 ? (
+                <div className="flex-shrink-0 flex gap-1">
+                  {item.images.slice(0, 3).map((url: string, i: number) => (
+                    <div
+                      key={url}
+                      className="relative w-14 h-14 rounded-xl overflow-hidden"
+                      style={{ background: '#FFF0E8' }}
+                    >
+                      <Image src={url} alt={`${item.title} ${i + 1}`} fill className="object-cover" />
+                      {i === 2 && item.images.length > 3 && (
+                        <div
+                          className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white"
+                          style={{ background: 'rgba(0,0,0,0.45)' }}
+                        >
+                          +{item.images.length - 3}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div
+                  className="flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center text-2xl"
+                  style={{ background: '#FFF0E8' }}
+                >
+                  🍠
+                </div>
+              )}
 
               {/* 내용 */}
               <div className="flex-1 min-w-0">

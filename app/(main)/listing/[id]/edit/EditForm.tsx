@@ -1,8 +1,11 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { updateListing } from '@/app/actions/listings'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+
+const MAX_IMAGES = 5
 
 const CATEGORIES = [
   '디지털/가전', '가구/인테리어', '의류/잡화', '도서/티켓',
@@ -37,6 +40,7 @@ type Props = {
     category: string
     price: number
     description: string | null
+    images: string[]
   }
 }
 
@@ -44,6 +48,19 @@ export default function EditForm({ id, initial }: Props) {
   const boundAction = updateListing.bind(null, id)
   const [state, action, isPending] = useActionState(boundAction, { error: null })
   const router = useRouter()
+  const [existingImages, setExistingImages] = useState(initial.images)
+  const [newPreviews, setNewPreviews] = useState<string[]>([])
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const room = MAX_IMAGES - existingImages.length
+    const files = Array.from(e.target.files ?? []).slice(0, Math.max(room, 0))
+    newPreviews.forEach((url) => URL.revokeObjectURL(url))
+    setNewPreviews(files.map((file) => URL.createObjectURL(file)))
+  }
+
+  function removeExisting(url: string) {
+    setExistingImages((prev) => prev.filter((u) => u !== url))
+  }
 
   return (
     <div>
@@ -60,6 +77,56 @@ export default function EditForm({ id, initial }: Props) {
       </div>
 
       <form action={action} className="flex flex-col gap-5">
+        {/* 사진 */}
+        <div>
+          <label className="block text-sm font-semibold mb-2" style={{ color: '#A0622E' }}>
+            사진 <span className="font-normal text-xs" style={{ color: '#CCC' }}>(최대 {MAX_IMAGES}장)</span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {existingImages.map((url) => (
+              <input key={url} type="hidden" name="keepImages" value={url} />
+            ))}
+
+            {existingImages.length + newPreviews.length < MAX_IMAGES && (
+              <label
+                className="flex-shrink-0 w-20 h-20 rounded-2xl flex flex-col items-center justify-center cursor-pointer"
+                style={{ border: '1.5px dashed #FFD0B5', background: '#FFFAF7', color: '#A0622E' }}
+              >
+                <span className="text-xl">📷</span>
+                <span className="text-xs mt-0.5">{existingImages.length + newPreviews.length}/{MAX_IMAGES}</span>
+                <input
+                  name="images"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+              </label>
+            )}
+
+            {existingImages.map((url) => (
+              <div key={url} className="relative w-20 h-20 rounded-2xl overflow-hidden" style={{ border: '1.5px solid #FFD0B5' }}>
+                <Image src={url} alt="기존 사진" fill className="object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removeExisting(url)}
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs"
+                  style={{ background: 'rgba(0,0,0,0.55)', color: 'white' }}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+
+            {newPreviews.map((url, i) => (
+              <div key={url} className="relative w-20 h-20 rounded-2xl overflow-hidden" style={{ border: '1.5px solid #FFD0B5' }}>
+                <Image src={url} alt={`새 사진 ${i + 1}`} fill className="object-cover" unoptimized />
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* 제목 */}
         <div>
           <label className="block text-sm font-semibold mb-2" style={{ color: '#A0622E' }}>

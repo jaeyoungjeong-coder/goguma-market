@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { OwnerActionBar, BuyerActionBar } from './ActionBar'
+import ImageGallery from './ImageGallery'
 
 function timeAgo(dateStr: string) {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -66,14 +68,18 @@ export default async function ListingDetailPage({
         <span className="font-bold text-base" style={{ color: '#2D1A0E' }}>상품 상세</span>
       </div>
 
-      {/* 이미지 자리 */}
-      <div
-        className="w-full aspect-square rounded-3xl flex flex-col items-center justify-center mb-5"
-        style={{ background: 'linear-gradient(135deg, #FFF0E8, #FFE4D6)' }}
-      >
-        <span className="text-7xl">{catEmoji}</span>
-        <p className="text-xs mt-3" style={{ color: '#C0A080' }}>사진이 없는 상품이에요</p>
-      </div>
+      {/* 이미지 */}
+      {listing.images?.length ? (
+        <ImageGallery images={listing.images} alt={listing.title} />
+      ) : (
+        <div
+          className="w-full aspect-square rounded-3xl flex flex-col items-center justify-center mb-5"
+          style={{ background: 'linear-gradient(135deg, #FFF0E8, #FFE4D6)' }}
+        >
+          <span className="text-7xl">{catEmoji}</span>
+          <p className="text-xs mt-3" style={{ color: '#C0A080' }}>사진이 없는 상품이에요</p>
+        </div>
+      )}
 
       {/* 상태 + 카테고리 */}
       <div className="flex items-center gap-2 mb-3">
